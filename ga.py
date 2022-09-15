@@ -1,8 +1,9 @@
 import pygame
 import time
 import random
+from pygame.math import Vector3
+from pygame.math import Vector2
 import math
-
 
 pygame.init()
 
@@ -17,13 +18,13 @@ time_prev = time.time()
 clock = pygame.time.Clock()
 
 # Colors
-color_black = (0, 0, 0)
-color_white = (255, 255, 255)
-color_red = (255, 0, 0)
-color_yellow = (255, 255, 0)
-color_green = (0, 255, 0)
-color_cyan = (0, 255, 255)
-color_blue = (0, 0, 255)
+v_black = Vector3(0, 0, 0)
+v_white = Vector3(255, 255, 255)
+v_red = Vector3(255, 0, 0)
+v_yellow = Vector3(255, 255, 0)
+v_green = Vector3(0, 255, 0)
+v_cyan = Vector3(0, 255, 255)
+v_blue = Vector3(0, 0, 255)
 
 # Text
 pygame.font.init()
@@ -40,35 +41,31 @@ def show_fps(delta_time, text_color=(0, 255, 0), outline_color=(0, 0, 0)):
     display.blit(fps_text, (0, 0))
 
 
-color_list = [color_white, color_white, color_white, color_white, color_white, color_white, color_black]
 angle = math.pi
-
-
-def color_choice(v):
-    return color_list[v]
+threshold_min = 0.02
+threshold_max = 0.98
 
 
 class PepperMoths:
-    def __init__(self, radius, pos, color):
+    def __init__(self, radius, pos, color=None):
         self.radius = radius
         self.pos = pos
-        self.color = color_list[random.randint(0, len(color_list) - 1)]
-
+        self.color = color or self.color_update(1 / 7)
 
     def draw(self, surface):
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
 
-
-    def color_update(self):
-        self.color = color_list[random.randint(0, len(color_list) - 1)]
+    def color_update(self, threshold):
+        x = random.uniform(0, 1)
+        if x <= threshold:
+            self.color = v_white
+        else:
+            self.color = v_black
 
 
 def make_PepperMoths(n, seed=4):
     random.seed(seed)
-    peppers = []
-    for i in range(n):
-        peppers.append(PepperMoths(20, [random.randint(150, 1050), random.randint(150, 750)], color_list[random.randint(0, len(color_list) - 1)]))
-    return peppers
+    return [PepperMoths(20, [random.randint(150, 1050), random.randint(150, 750)]) for _ in range(n)]
 
 
 pepper = make_PepperMoths(10)
@@ -91,19 +88,17 @@ while run:
 
         # Keypresses
         # if event.type == pygame.KEYDOWN:
-            # if event.key == pygame.K_1:
-
-    rgb_value = ((math.sin(angle) + 1) / 2 * 255, (math.sin(angle) + 1) / 2 * 255, (math.sin(angle) + 1) / 2 * 255)
+        # if event.key == pygame.K_1:
+    sin_angle = math.sin(angle) * 0.5 + 0.5
+    rgb_value = sin_angle * v_white
     angle += 0.1 * dt
     display.fill(rgb_value)
 
-
     for p in pepper:
-        p.color_update()
+        p.color_update(min(threshold_max, max(sin_angle, threshold_min)))
         p.draw(display)
 
-    # manipulate probability list depending on the color of the background
-
+    print(min(threshold_max, max(sin_angle, threshold_min)))
     show_fps(dt)
     pygame.display.update()
     clock.tick(5)
