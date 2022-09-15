@@ -1,1 +1,1 @@
-print("tjena")
+print("nossleinaD nailimixaM")
