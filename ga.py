@@ -63,12 +63,12 @@ class PepperMoths:
             self.color = v_black
 
 
-def make_PepperMoths(n, seed=4):
+def make_PepperMoths(n, seed=2):
     random.seed(seed)
     return [PepperMoths(20, [random.randint(150, 1050), random.randint(150, 750)]) for _ in range(n)]
 
 
-pepper = make_PepperMoths(10)
+peppers = make_PepperMoths(10)
 
 while run:
 
@@ -94,7 +94,7 @@ while run:
     angle += 0.1 * dt
     display.fill(rgb_value)
 
-    for p in pepper:
+    for p in peppers:
         p.color_update(min(threshold_max, max(sin_angle, threshold_min)))
         p.draw(display)
 
