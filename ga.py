@@ -8,9 +8,7 @@ import statistics
 
 pygame.init()
 
-WINDOW_RESOLUTION = (1200, 900)
-image_resolution = [1200, 900]
-transform_resolution = (WINDOW_RESOLUTION[0] / image_resolution[0], WINDOW_RESOLUTION[1] / image_resolution[1])
+WINDOW_RESOLUTION = Vector2(1200, 900)
 display = pygame.display.set_mode(WINDOW_RESOLUTION, pygame.RESIZABLE)
 pygame.display.set_caption(__file__.split("\\")[-1])
 
@@ -29,7 +27,7 @@ v_blue = Vector3(0, 0, 255)
 
 # Text
 pygame.font.init()
-font = pygame.font.SysFont('leelawadeeuisemilight', WINDOW_RESOLUTION[0] // 32)
+font = pygame.font.SysFont('leelawadeeuisemilight', 16)
 
 
 def show_fps(delta_time, text_color=(0, 255, 0), outline_color=(0, 0, 0)):
@@ -42,7 +40,7 @@ def show_fps(delta_time, text_color=(0, 255, 0), outline_color=(0, 0, 0)):
     display.blit(fps_text, (0, 0))
 
 
-angle = math.pi
+angle = math.pi / 2
 
 threshold_min = 0.02
 threshold_max = 0.98
@@ -51,32 +49,37 @@ reproduce_counter = 0
 death_counter = 0
 average = []
 
-class PepperMoths:
+
+class PepperMoth:
     def __init__(self, radius, pos, color=None):
         self.radius = radius
         self.pos = pos
         self.color = random.choice((v_white, v_black))
 
+    def __str__(self):
+        return str(self.__dict__)
+
+    def reproduce(self):
+        return PepperMoth(self.radius, [random.randint(150, 1050), random.randint(150, 750)], self.color)
+
     def draw(self, surface):
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
 
 
-
-def make_peppermoths(n, seed=112):
+def make_peppermoths(n, seed=30):
     random.seed(seed)
-    return [PepperMoths(10, [random.randint(150, 1050), random.randint(150, 750)]) for _ in range(n)]
+    return [PepperMoth(10, [random.randint(150, 1050), random.randint(150, 750)]) for _ in range(n)]
 
 
 peppers = make_peppermoths(100)
 
 
-def reproduce(r_prob: float = 0.05) -> None:
+def reproduce(r_prob: float = 0.275) -> None:
     global peppers
     global reproduce_counter
     for i in range(len(peppers)):
-        x = random.uniform(0, 1)
-        if r_prob >= x:
-            peppers.insert(i, PepperMoths(peppers[i].radius, [random.randint(150, 1050), random.randint(150, 750)], peppers[i].color))
+        if r_prob >= random.uniform(0, 1):
+            peppers.insert(i, peppers[i].reproduce())
             reproduce_counter += 1
 
 
@@ -86,7 +89,7 @@ def die():
     global average
     i = 0
     while i < len(peppers):
-        d_prob = 0.028 + abs(peppers[i].color[0] / 255 - sin_angle) / 20
+        d_prob = 0.25 + abs(peppers[i].color[0] / 255 - sin_angle) / 20
         average.append(d_prob)
         if d_prob >= random.uniform(0, 1):
             peppers.pop(i)
@@ -110,6 +113,7 @@ while run:
         # Resize window event
         if event.type == pygame.VIDEORESIZE:
             display = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+            WINDOW_RESOLUTION = Vector2(event.w, event.h)
 
         # Keypresses
         # if event.type == pygame.KEYDOWN:
