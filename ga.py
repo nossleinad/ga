@@ -7,8 +7,6 @@ from pygame.math import Vector3
 from pygame.math import Vector2
 from collections import deque
 
-
-
 pygame.init()
 
 WINDOW_RESOLUTION = Vector2(1200, 900)
@@ -72,7 +70,8 @@ class PepperMoth:
             color = self.color
         else:
             color = Vector3(255, 255, 255) - self.color
-        return PepperMoth(self.radius, [random.randint(150, 1050), random.randint(150, 750)], color)
+        return PepperMoth(self.radius, [random.randint(150, WINDOW_RESOLUTION[0] - 150),
+                                        random.randint(150, WINDOW_RESOLUTION[1] - 150)], color)
 
     def draw(self, surface):
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
@@ -80,10 +79,11 @@ class PepperMoth:
 
 def make_peppermoths(n, seed=1000):
     random.seed(seed)
-    return [PepperMoth(10, [random.randint(150, 1050), random.randint(150, 750)]) for _ in range(n)]
+    return [PepperMoth(3, [random.randint(150, WINDOW_RESOLUTION[0] - 150),
+                           random.randint(150, WINDOW_RESOLUTION[1] - 150)]) for _ in range(n)]
 
 
-peppers = make_peppermoths(1000)
+peppers = make_peppermoths(100)
 
 
 def reproduce(r_prob: float = 0.3) -> None:
@@ -95,7 +95,7 @@ def reproduce(r_prob: float = 0.3) -> None:
             reproduce_counter += 1
 
 
-def die(alpha=0.01): # alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
+def die(alpha=0.05):  # alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
     global peppers
     global death_counter
     global average
@@ -143,13 +143,12 @@ while run:
     angle += 0.1 * dt
     display.fill(background_color)
 
-
     for p in peppers:
         p.draw(display)
 
-    reproduce()
+    if len(peppers) < 1000:  # bärkraft
+        reproduce()
     die()
-
 
     display.blit(font.render(f'Reproduce counter: {reproduce_counter}', True, v_red), (130, 0))
     display.blit(font.render(f'Death counter: {death_counter}', True, v_red), (600, 0))
