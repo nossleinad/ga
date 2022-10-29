@@ -79,7 +79,7 @@ class PepperMoth:
 
 def make_peppermoths(n, seed=1000):
     random.seed(seed)
-    return [PepperMoth(3, [random.randint(150, WINDOW_RESOLUTION[0] - 150),
+    return [PepperMoth(5, [random.randint(150, WINDOW_RESOLUTION[0] - 150),
                            random.randint(150, WINDOW_RESOLUTION[1] - 150)]) for _ in range(n)]
 
 
