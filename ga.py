@@ -10,6 +10,7 @@ from collections import deque
 pygame.init()
 
 WINDOW_RESOLUTION = Vector2(1200, 900)
+margin = 150 # avstånd mellan området med moths och window
 display = pygame.display.set_mode(WINDOW_RESOLUTION, pygame.RESIZABLE)
 pygame.display.set_caption(__file__.split("\\")[-1])
 
@@ -47,17 +48,20 @@ reproduce_counter = 0
 death_counter = 0
 white_counter = 0
 black_counter = 0
+genotypes = ["BB", "Bw", "wB", "ww"]
+genotype_to_fenotype = {genotype: v_black if "B" in genotype else v_white for genotype in genotypes}
 
 average = deque(maxlen=200)
 
 
 class PepperMoth:
-    def __init__(self, radius, pos, color=None):
+    def __init__(self, radius, pos, genotype=random.choice(genotypes)):
         global white_counter
         global black_counter
         self.radius = radius
         self.pos = pos
-        self.color = color if color is not None else random.choice((v_white, v_black))
+        self.genotype = genotype
+        self.color = genotype_to_fenotype[genotype]
         white_counter += bool(self.color)
         black_counter += not bool(self.color)
 
@@ -65,29 +69,29 @@ class PepperMoth:
         return str(self.__dict__)
 
     def reproduce(self):
+        # mutations
         m_prob = 0.02
         if m_prob < random.uniform(0, 1):
-            color = self.color
+            genotype = self.genotype
         else:
-            color = Vector3(255, 255, 255) - self.color
-        return PepperMoth(self.radius, [random.randint(150, WINDOW_RESOLUTION[0] - 150),
-                                        random.randint(150, WINDOW_RESOLUTION[1] - 150)], color)
+            genotype = random.choice(genotypes)
+        return PepperMoth(self.radius, [random.randint(150, WINDOW_RESOLUTION[0] - margin),
+                                        random.randint(150, WINDOW_RESOLUTION[1] - margin)], genotype)
 
     def draw(self, surface):
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
 
 
-def make_peppermoths(n, seed=1000):
+def make_peppermoths(n, seed=10):
     random.seed(seed)
-    return [PepperMoth(5, [random.randint(150, WINDOW_RESOLUTION[0] - 150),
-                           random.randint(150, WINDOW_RESOLUTION[1] - 150)]) for _ in range(n)]
+    return [PepperMoth(5, [random.randint(150, WINDOW_RESOLUTION[0] - margin),
+                           random.randint(150, WINDOW_RESOLUTION[1] - margin)]) for _ in range(n)]
 
 
 peppers = make_peppermoths(100)
+r_prob = 0.3
 
-
-def reproduce(r_prob: float = 0.3) -> None:
-    global peppers
+def reproduce(r_prob) -> None:
     global reproduce_counter
     for i in range(len(peppers)):
         if r_prob >= random.uniform(0, 1):
@@ -96,14 +100,12 @@ def reproduce(r_prob: float = 0.3) -> None:
 
 
 def die(alpha=0.05):  # alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
-    global peppers
     global death_counter
-    global average
     global white_counter
     global black_counter
     i = 0
     while i < len(peppers):
-        d_prob = 0.3 / 1.3 - alpha + abs(peppers[i].color[0] / 255 - sin_angle) * 2 * alpha
+        d_prob = r_prob / (1 + r_prob) - alpha + abs(peppers[i].color[0] / 255 - sin_angle) * 2 * alpha
         average.append(d_prob)
         if d_prob >= random.uniform(0, 1):
             white_counter -= bool(peppers[i].color)
@@ -147,7 +149,7 @@ while run:
         p.draw(display)
 
     if len(peppers) < 1000:  # bärkraft
-        reproduce()
+        reproduce(r_prob)
     die()
 
     display.blit(font.render(f'Reproduce counter: {reproduce_counter}', True, v_red), (130, 0))
