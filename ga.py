@@ -10,7 +10,7 @@ from pygame.math import Vector3
 
 pygame.init()
 
-WINDOW_RESOLUTION = Vector2(1200, 900)
+WINDOW_RESOLUTION = Vector2(1200, 600)
 margin = 150  # Avstånd mellan området med moths och window
 display = pygame.display.set_mode(WINDOW_RESOLUTION, pygame.RESIZABLE)
 pygame.display.set_caption(__file__.split("\\")[-1])
@@ -41,9 +41,6 @@ def show_fps(delta_time, text_color=(0, 255, 0), outline_color=(0, 0, 0)):
     display.blit(fps_outline, (1, -1))
     display.blit(fps_outline, (1, 1))
     display.blit(fps_text, (0, 0))
-
-
-angle = math.pi / 6
 
 #  Black and White
 white_counter = 0
@@ -88,14 +85,20 @@ class PepperMoth:
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
 
 
-def make_peppermoths(n, seed=98):
+def make_peppermoths(n, seed=99):
     random.seed(seed)
     return [PepperMoth(5, Vector2(random.randint(margin, int(WINDOW_RESOLUTION[0] - margin)),
                                   random.randint(margin, int(WINDOW_RESOLUTION[1] - margin)))) for _ in range(n)]
 
 
-peppers = make_peppermoths(100)
-r_prob = 0.3
+# Other
+peppers = make_peppermoths(999)
+r_prob = 0.325
+angle = 0
+buoyancy = 1000
+buoyancy_toggle = len(peppers) > buoyancy
+children = 4
+surplus = r_prob * children - 1
 
 
 def mating_partners(r_prob) -> None:
@@ -104,19 +107,20 @@ def mating_partners(r_prob) -> None:
         pepper = peppers[i]
         pepper.age += 1
         if r_prob >= random.uniform(0, 1):
-            peppers.append(pepper.reproduce(peppers[random.choice([k for k in range(peppers_len) if k != i])]))
+            for j in range(children):
+                peppers.append(pepper.reproduce(peppers[random.choice([j for k in range(peppers_len) if k != i])]))
 
 
-def die(alpha=0.05) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
+def die(alpha=0.15) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
     global white_counter
     global black_counter
     i = 0
     while i < len(peppers):
         pepper = peppers[i]
-        d_prob = r_prob / (1 + r_prob) - alpha + abs(pepper.color[0] / 255 - sin_angle) * 2 * alpha
+        d_prob = surplus / (1 + surplus) - alpha + abs(pepper.color[0] / 255 - cos_angle) * 2 * alpha
 
-        if pepper.age >= 10:
-            d_prob = 1
+        if pepper.age >= 1:
+            d_prob += 1 - 0.000001 / pepper.age
 
         average_d_prob.append(d_prob)
         if d_prob >= random.uniform(0, 1):
@@ -152,16 +156,19 @@ while run:
         # if event.key == pygame.K_1:
 
     #  Background
-    sin_angle = math.sin(angle) * 0.5 + 0.5
-    background_color = sin_angle * v_white
+    cos_angle = math.cos(angle) * 0.5 + 0.5
+    background_color = cos_angle * v_white
     angle += 0.1 * dt
     display.fill(background_color)
 
     for p in peppers:
         p.draw(display)
 
-    if len(peppers) < 1000:  #  Buoyancy
-        mating_partners(r_prob)
+    #  Buoyancy
+    if buoyancy_toggle != (len(peppers) > buoyancy):
+        buoyancy_toggle = not buoyancy_toggle
+        r_prob = r_prob / 2 if buoyancy_toggle else r_prob * 2
+    mating_partners(r_prob)
     die()
 
     #  Statistics blits
@@ -181,4 +188,4 @@ while run:
     black_counter_list.append(black_counter)
 
     #  Frequency
-    clock.tick(10)
+    clock.tick(5)
