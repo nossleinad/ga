@@ -88,7 +88,7 @@ class PepperMoth:
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
 
 
-def make_peppermoths(n, seed=99):
+def make_peppermoths(n, seed=98):
     random.seed(seed)
     return [PepperMoth(5, Vector2(random.randint(margin, int(WINDOW_RESOLUTION[0] - margin)),
                                   random.randint(margin, int(WINDOW_RESOLUTION[1] - margin)))) for _ in range(n)]
@@ -99,10 +99,12 @@ r_prob = 0.3
 
 
 def mating_partners(r_prob) -> None:
-    for pepper in peppers:
+    peppers_len = len(peppers)
+    for i in range(peppers_len):
+        pepper = peppers[i]
         pepper.age += 1
         if r_prob >= random.uniform(0, 1):
-            peppers.append(pepper.reproduce(random.choice(peppers)))
+            peppers.append(pepper.reproduce(peppers[random.choice([k for k in range(peppers_len) if k != i])]))
 
 
 def die(alpha=0.05) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
@@ -113,7 +115,7 @@ def die(alpha=0.05) -> None:  # Alpha är amplituden för hur mycket d_prob svä
         pepper = peppers[i]
         d_prob = r_prob / (1 + r_prob) - alpha + abs(pepper.color[0] / 255 - sin_angle) * 2 * alpha
 
-        if pepper.age >= 5:
+        if pepper.age >= 10:
             d_prob = 1
 
         average_d_prob.append(d_prob)
@@ -135,9 +137,9 @@ while run:
     # Event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print(generation_list)
-            print(white_counter_list)
-            print(black_counter_list)
+            print(f'generation list: {generation_list}')
+            print(f'white counter list {white_counter_list}')
+            print(f'black counter list {black_counter_list}')
             run = False
 
         # Resize window event
