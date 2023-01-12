@@ -73,7 +73,7 @@ class PepperMoth:
 
     def reproduce(self, other):
         # Mutations
-        m_prob = 0.02
+        m_prob = 0.005
         if m_prob < random.uniform(0, 1):
             genotype = random.choice(self.genotype) + random.choice(other.genotype)
         else:
@@ -85,19 +85,18 @@ class PepperMoth:
         pygame.draw.circle(surface, self.color, self.pos, self.radius)
 
 
-def make_peppermoths(n, seed=99):
+def make_peppermoths(n, seed=101):
     random.seed(seed)
     return [PepperMoth(5, Vector2(random.randint(margin, int(WINDOW_RESOLUTION[0] - margin)),
-                                  random.randint(margin, int(WINDOW_RESOLUTION[1] - margin)))) for _ in range(n)]
+                                  random.randint(margin, int(WINDOW_RESOLUTION[1] - margin))), 'ww') for _ in range(n)]
 
 
 # Other
 peppers = make_peppermoths(999)
-r_prob = 0.325
+r_prob = 0.8
 angle = 0
 buoyancy = 1000
-buoyancy_toggle = len(peppers) > buoyancy
-children = 4
+children = 2
 surplus = r_prob * children - 1
 
 
@@ -107,22 +106,28 @@ def mating_partners(r_prob) -> None:
         pepper = peppers[i]
         pepper.age += 1
         if r_prob >= random.uniform(0, 1):
+            try:
+                mating_index = random.choice([k for k in range(peppers_len) if k != i and peppers[k].age])
+            except IndexError:
+                continue
             for j in range(children):
-                peppers.append(pepper.reproduce(peppers[random.choice([j for k in range(peppers_len) if k != i])]))
+                peppers.append(pepper.reproduce(peppers[mating_index]))
 
 
-def die(alpha=0.15) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
+
+def die(alpha=0.10) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
     global white_counter
     global black_counter
     i = 0
     while i < len(peppers):
         pepper = peppers[i]
         d_prob = surplus / (1 + surplus) - alpha + abs(pepper.color[0] / 255 - cos_angle) * 2 * alpha
+        average_d_prob.append(d_prob)
 
         if pepper.age >= 1:
             d_prob += 1 - 0.000001 / pepper.age
 
-        average_d_prob.append(d_prob)
+
         if d_prob >= random.uniform(0, 1):
             white_counter -= bool(pepper.color)
             black_counter -= not bool(pepper.color)
@@ -158,17 +163,17 @@ while run:
     #  Background
     cos_angle = math.cos(angle) * 0.5 + 0.5
     background_color = cos_angle * v_white
-    angle += 0.1 * dt
+    angle += 0.2 * dt
     display.fill(background_color)
 
     for p in peppers:
         p.draw(display)
 
     #  Buoyancy
-    if buoyancy_toggle != (len(peppers) > buoyancy):
-        buoyancy_toggle = not buoyancy_toggle
-        r_prob = r_prob / 2 if buoyancy_toggle else r_prob * 2
-    mating_partners(r_prob)
+    population = white_counter + black_counter
+    population2 = len(peppers)
+    curr_r_prob = min(max(r_prob + (buoyancy - len(peppers)) / buoyancy, 0.1), 0.95)
+    mating_partners(curr_r_prob)
     die()
 
     #  Statistics blits
