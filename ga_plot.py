@@ -49,7 +49,7 @@ class PepperMoth:
 
     def reproduce(self, other):
         # Mutations
-        m_prob = 0.02
+        m_prob = 0.01
         if m_prob < random.uniform(0, 1):
             genotype = random.choice(self.genotype) + random.choice(other.genotype)
         else:
@@ -59,7 +59,7 @@ class PepperMoth:
 
 def make_peppermoths(n, seed=96):
     random.seed(seed)
-    return [PepperMoth() for _ in range(n)]
+    return [PepperMoth("ww") for _ in range(n)]
 
 
 peppers = make_peppermoths(999)
@@ -78,7 +78,7 @@ def mating_partners(r_prob) -> None:
                 continue
 
 
-def die(alpha=0.05) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
+def die(alpha=0.1) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
     global white_counter
     global black_counter
     i = 0
@@ -100,7 +100,7 @@ def die(alpha=0.05) -> None:  # Alpha är amplituden för hur mycket d_prob svä
 
 black_counter_lists = []
 white_counter_lists = []
-x = np.arange(0, 200)
+x = np.arange(1800, 1960)
 batch_size = 100
 
 for _ in range(batch_size):
@@ -109,7 +109,7 @@ for _ in range(batch_size):
         #  Background
         cos_angle = math.cos(angle) * 0.5 + 0.5
         background_color = cos_angle * v_white
-        angle += 0.1
+        angle += 2 * math.pi / 160
 
         if 1 < len(peppers) < 1000:  # Buoyancy
             mating_partners(r_prob)
@@ -121,7 +121,7 @@ for _ in range(batch_size):
         white_counter_list.append(white_counter)
         black_counter_list.append(black_counter)
 
-        if generation >= 200:
+        if generation >= 160:
             run = False
 
     black_counter_list = np.array(black_counter_list)
@@ -134,7 +134,7 @@ for _ in range(batch_size):
     black_counter = 0
 
     #  Reset
-    peppers = make_peppermoths(100)
+    peppers = make_peppermoths(999)
     angle = 0
 
     #  Statistics
@@ -147,9 +147,9 @@ for _ in range(batch_size):
 #  Plot-part
 
 #  Individual sims
-for i in range(batch_size):
-    plt.plot(x, black_counter_lists[i], color='k', linewidth=1, alpha=0.8)
-    plt.plot(x, white_counter_lists[i], color='k', linewidth=1, alpha=0.8)
+for indx in range(batch_size):
+    plt.plot(x, black_counter_lists[indx], color='b', linewidth=1, alpha=0.8)
+    plt.plot(x, white_counter_lists[indx], color='r', linewidth=1, alpha=0.8)
 #  Averages
 avg_black = np.mean(np.array(black_counter_lists), axis=0)
 avg_white = np.mean(np.array(white_counter_lists), axis=0)
