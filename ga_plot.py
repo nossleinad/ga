@@ -103,13 +103,13 @@ white_counter_lists = []
 x = np.arange(1800, 1960)
 batch_size = 100
 
-for _ in range(batch_size):
+for sim in range(batch_size):
     run = True
     while run:
         #  Background
         cos_angle = math.cos(angle) * 0.5 + 0.5
         background_color = cos_angle * v_white
-        angle += 2 * math.pi / 160
+        angle += 2 * np.pi / 200
 
         if 1 < len(peppers) < 1000:  # Buoyancy
             mating_partners(r_prob)
@@ -125,7 +125,7 @@ for _ in range(batch_size):
             run = False
 
     black_counter_list = np.array(black_counter_list)
-    white_counter_list = np.array(white_counter_list) + black_counter_list
+    white_counter_list = np.array(white_counter_list)
     black_counter_lists.append(black_counter_list)
     white_counter_lists.append(white_counter_list)
 
@@ -134,10 +134,8 @@ for _ in range(batch_size):
     black_counter = 0
 
     #  Reset
-    peppers = make_peppermoths(999)
+    peppers = make_peppermoths(999, sim)
     angle = 0
-
-    #  Statistics
     generation_list = deque(maxlen=200)
     generation = 0
     white_counter_list = deque(maxlen=200)
@@ -148,15 +146,17 @@ for _ in range(batch_size):
 
 #  Individual sims
 for indx in range(batch_size):
-    plt.plot(x, black_counter_lists[indx], color='b', linewidth=1, alpha=0.8)
-    plt.plot(x, white_counter_lists[indx], color='r', linewidth=1, alpha=0.8)
+    plt.plot(x, black_counter_lists[indx], color='b', linewidth=1, alpha=0.15)
+    plt.plot(x, white_counter_lists[indx], color='r', linewidth=1, alpha=0.15)
 #  Averages
 avg_black = np.mean(np.array(black_counter_lists), axis=0)
 avg_white = np.mean(np.array(white_counter_lists), axis=0)
 plt.plot(x, avg_black, color='k', linewidth=2, alpha=1)
 plt.plot(x, avg_white, color='k', linewidth=2, alpha=1)
 
-plt.fill_between(x, avg_black, avg_white, color=(0.9, 0.9, 0.9, 1))
-plt.fill_between(x, avg_black, color=(0.1, 0.1, 0.1, 0.7))
+plt.fill_between(x, avg_black, avg_white, where=avg_white > avg_black, color=(0.9, 0.9, 0.9, 1), interpolate=True)
+plt.fill_between(x, avg_black, avg_white, where=avg_white < avg_black, color=(0.1, 0.1, 0.1, 0.7), interpolate=True)
+plt.fill_between(x, avg_black, where=avg_white > avg_black, color=(0.1, 0.1, 0.1, 0.7))
+plt.fill_between(x, avg_white, where=avg_white < avg_black, color=(0.9, 0.9, 0.9, 1))
 
 plt.show()
