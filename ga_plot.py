@@ -78,7 +78,7 @@ def mating_partners(r_prob) -> None:
                 continue
 
 
-def die(alpha=0.1) -> None:  # Alpha är amplituden för hur mycket d_prob svänger mellan det stabila d_prob = r_prob / (1 + r_prob)
+def die(alpha=0.1) -> None:  # Alpha är amplituden för hur mycket d_prob svänger omkring det stabila d_prob = r_prob / (1 + r_prob)
     global white_counter
     global black_counter
     i = 0
