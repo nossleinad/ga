@@ -57,7 +57,7 @@ class PepperMoth:
         return PepperMoth(genotype)
 
 
-def make_peppermoths(n, seed=96):
+def make_peppermoths(n, seed=500):
     random.seed(seed)
     return [PepperMoth("ww") for _ in range(n)]
 
@@ -109,7 +109,7 @@ for sim in range(batch_size):
         #  Background
         cos_angle = math.cos(angle) * 0.5 + 0.5
         background_color = cos_angle * v_white
-        angle += 2 * np.pi / 200
+        angle += 2 * np.pi / 160
 
         if 1 < len(peppers) < 1000:  # Buoyancy
             mating_partners(r_prob)
@@ -151,12 +151,12 @@ for indx in range(batch_size):
 #  Averages
 avg_black = np.mean(np.array(black_counter_lists), axis=0)
 avg_white = np.mean(np.array(white_counter_lists), axis=0)
-plt.plot(x, avg_black, color='k', linewidth=2, alpha=1)
+plt.plot(x, avg_black, color='k', linewidth=2, alpha=1, linestyle='dashed')
 plt.plot(x, avg_white, color='k', linewidth=2, alpha=1)
 
-plt.fill_between(x, avg_black, avg_white, where=avg_white > avg_black, color=(0.9, 0.9, 0.9, 1), interpolate=True)
-plt.fill_between(x, avg_black, avg_white, where=avg_white < avg_black, color=(0.1, 0.1, 0.1, 0.7), interpolate=True)
-plt.fill_between(x, avg_black, where=avg_white > avg_black, color=(0.1, 0.1, 0.1, 0.7))
-plt.fill_between(x, avg_white, where=avg_white < avg_black, color=(0.9, 0.9, 0.9, 1))
+# plt.fill_between(x, avg_black, avg_white, where=avg_white > avg_black, color=(0.9, 0.9, 0.9, 1), interpolate=True)
+# plt.fill_between(x, avg_black, avg_white, where=avg_white < avg_black, color=(0.1, 0.1, 0.1, 0.7), interpolate=True)
+# plt.fill_between(x, avg_black, where=avg_white > avg_black, color=(0.1, 0.1, 0.1, 0.7))
+# plt.fill_between(x, avg_white, where=avg_white < avg_black, color=(0.9, 0.9, 0.9, 1))
 
 plt.show()

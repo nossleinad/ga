@@ -170,8 +170,6 @@ while run:
         p.draw(display)
 
     #  Buoyancy
-    population = white_counter + black_counter
-    population2 = len(peppers)
     curr_r_prob = min(max(r_prob + (buoyancy - len(peppers)) / buoyancy, 0.1), 0.95)
     mating_partners(curr_r_prob)
     die()

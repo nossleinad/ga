@@ -76,9 +76,11 @@ def mating_partners(r_prob) -> None:
         pepper.age += 1
         if r_prob >= random.uniform(0, 1):
             try:
-                peppers.append(pepper.reproduce(peppers[random.choice([k for k in range(peppers_len) if k != i and peppers[k].age])]))
+                mating_index = random.choice([k for k in range(peppers_len) if k != i and peppers[k].age])
             except IndexError:
                 continue
+            for j in range(children):
+                peppers.append(pepper.reproduce(peppers[mating_index]))
 
 
 def die(alpha=0.1) -> None:  # Alpha är amplituden för hur mycket d_prob svänger omkring det stabila d_prob = r_prob / (1 + r_prob)
@@ -104,7 +106,7 @@ def die(alpha=0.1) -> None:  # Alpha är amplituden för hur mycket d_prob svän
 black_counter_lists = []
 white_counter_lists = []
 x = np.arange(1800, 1960)
-batch_size = 100
+batch_size = 10
 
 for sim in range(batch_size):
     run = True
