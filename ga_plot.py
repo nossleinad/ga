@@ -18,7 +18,7 @@ v_green = Vector3(0, 255, 0)
 v_cyan = Vector3(0, 255, 255)
 v_blue = Vector3(0, 0, 255)
 
-angle = 0
+angle = np.pi - (80 * 2 * np.pi / 200)
 
 #  Black and White
 white_counter = 0
@@ -111,7 +111,7 @@ for sim in range(batch_size):
         #  Background
         cos_angle = math.cos(angle) * 0.5 + 0.5
         background_color = cos_angle * v_white
-        angle += 2 * np.pi / 160
+        angle += 2 * np.pi / 200
 
         if 1 < len(peppers) < 1000:  # Buoyancy
             mating_partners(r_prob)
@@ -130,8 +130,8 @@ for sim in range(batch_size):
     black_counter = 0
 
     #  Reset
-    peppers = make_peppermoths(999, sim)
-    angle = 0
+    peppers = make_peppermoths(999, sim + 200)
+    angle = np.pi - (80 * 2 * np.pi / 200)
     generation = 0
     white_counter_list = deque(maxlen=200)
     black_counter_list = deque(maxlen=200)
