@@ -27,11 +27,9 @@ genotypes = ["BB", "Bw", "wB", "ww"]
 genotype_to_fenotype = {genotype: v_black if "B" in genotype else v_white for genotype in genotypes}
 
 #  Statistics
-generation_list = deque(maxlen=200)
 generation = 0
 white_counter_list = deque(maxlen=200)
 black_counter_list = deque(maxlen=200)
-average_d_prob = deque(maxlen=200)
 
 
 class PepperMoth:
@@ -89,7 +87,6 @@ def die(alpha=0.1) -> None:  # Alpha är amplituden för hur mycket d_prob svän
         if pepper.age >= 10:
             d_prob = 1
 
-        average_d_prob.append(d_prob)
         if d_prob >= random.uniform(0, 1):
             white_counter -= bool(pepper.color)
             black_counter -= not bool(pepper.color)
@@ -106,6 +103,11 @@ batch_size = 100
 for sim in range(batch_size):
     run = True
     while run:
+        #  Plotdata
+        white_counter_list.append(white_counter)
+        black_counter_list.append(black_counter)
+        generation += 1
+
         #  Background
         cos_angle = math.cos(angle) * 0.5 + 0.5
         background_color = cos_angle * v_white
@@ -114,12 +116,6 @@ for sim in range(batch_size):
         if 1 < len(peppers) < 1000:  # Buoyancy
             mating_partners(r_prob)
         die()
-
-        #  Plotdata
-        generation += 1
-        generation_list.append(generation)
-        white_counter_list.append(white_counter)
-        black_counter_list.append(black_counter)
 
         if generation >= 160:
             run = False
@@ -136,27 +132,27 @@ for sim in range(batch_size):
     #  Reset
     peppers = make_peppermoths(999, sim)
     angle = 0
-    generation_list = deque(maxlen=200)
     generation = 0
     white_counter_list = deque(maxlen=200)
     black_counter_list = deque(maxlen=200)
-    average_d_prob = deque(maxlen=200)
 
 #  Plot-part
 
 #  Individual sims
-for indx in range(batch_size):
+#  Fixing labels
+plt.plot(x, black_counter_lists[0], color='b', linewidth=1, alpha=0.15, label='Svart population från en enskild simulering')
+plt.plot(x, white_counter_lists[0], color='r', linewidth=1, alpha=0.15, linestyle=(0, (5, 3)), label='Vit population från en enskild simulering')
+for indx in range(1, batch_size):
     plt.plot(x, black_counter_lists[indx], color='b', linewidth=1, alpha=0.15)
-    plt.plot(x, white_counter_lists[indx], color='r', linewidth=1, alpha=0.15)
+    plt.plot(x, white_counter_lists[indx], color='r', linewidth=1, alpha=0.15, linestyle=(0, (5, 3)))
 #  Averages
 avg_black = np.mean(np.array(black_counter_lists), axis=0)
 avg_white = np.mean(np.array(white_counter_lists), axis=0)
-plt.plot(x, avg_black, color='k', linewidth=2, alpha=1, linestyle='dashed')
-plt.plot(x, avg_white, color='k', linewidth=2, alpha=1)
+plt.plot(x, avg_black, color='k', linewidth=2, alpha=1, label='Medelvärde svart population')
+plt.plot(x, avg_white, color='k', linewidth=2, alpha=1, linestyle='dashed', label='Medelvärde vit population')
 
-# plt.fill_between(x, avg_black, avg_white, where=avg_white > avg_black, color=(0.9, 0.9, 0.9, 1), interpolate=True)
-# plt.fill_between(x, avg_black, avg_white, where=avg_white < avg_black, color=(0.1, 0.1, 0.1, 0.7), interpolate=True)
-# plt.fill_between(x, avg_black, where=avg_white > avg_black, color=(0.1, 0.1, 0.1, 0.7))
-# plt.fill_between(x, avg_white, where=avg_white < avg_black, color=(0.9, 0.9, 0.9, 1))
-
+plt.legend(loc='upper right', prop={'size': 16})
+plt.ylabel('Populationsstorlek', fontsize=20)
+plt.xlabel('År', fontsize=20)
+plt.tick_params(labelsize=20)
 plt.show()
