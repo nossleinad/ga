@@ -61,7 +61,7 @@ def make_peppermoths(n, seed=500):
 # Other
 peppers = make_peppermoths(1000)
 r_prob = 0.8
-angle = 0
+angle = np.pi - (80 * 2 * np.pi / 200)
 buoyancy = 1000
 children = 2
 surplus = r_prob * children - 1
@@ -116,7 +116,7 @@ for sim in range(batch_size):
         #  Background
         cos_angle = math.cos(angle) * 0.5 + 0.5
         background_color = cos_angle * v_white
-        angle += 2 * np.pi / 160
+        angle += 2 * np.pi / 200
 
         curr_r_prob = min(max(r_prob + (buoyancy - len(peppers)) / (3 * buoyancy), 0.1), 0.95)
         mating_partners(curr_r_prob)
@@ -136,7 +136,7 @@ for sim in range(batch_size):
 
     #  Reset
     peppers = make_peppermoths(1000, sim)
-    angle = 0
+    angle = np.pi - (80 * 2 * np.pi / 200)
     generation = 0
     white_counter_list = deque(maxlen=200)
     black_counter_list = deque(maxlen=200)
